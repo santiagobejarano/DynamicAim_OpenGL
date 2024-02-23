@@ -1,0 +1,11 @@
+Model Information:
+* title:	CSGO Logo
+* source:	https://sketchfab.com/3d-models/csgo-logo-e1c3dd5dc948412fb6c5d61d4c196e73
+* author:	AnshiNoWara (https://sketchfab.com/AnshiNoWara)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "CSGO Logo" (https://sketchfab.com/3d-models/csgo-logo-e1c3dd5dc948412fb6c5d61d4c196e73) by AnshiNoWara (https://sketchfab.com/AnshiNoWara) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
