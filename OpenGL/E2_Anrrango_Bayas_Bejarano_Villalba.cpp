@@ -14,6 +14,7 @@
 #define STB_IMAGE_IMPLEMENTATION 
 #include <learnopengl/stb_image.h>
 #include <vector>
+#include <random>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -25,14 +26,21 @@ unsigned int loadTexture(const char* path);
 void drawM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& m4);
 void drawDeagle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& deagle);
 void drawBayonet(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& bayonet);
+void drawSkybox(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& skybox);
+
+void shootRayFromCamera(Camera& camera, Model& target, glm::mat4& targetModelMatrix);
+bool intersectRayTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDir, const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, float& t);
+bool intersectsTargetRayTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, const Model& model);
+void checkRayIntersection(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, glm::mat4& targetModelMatrix, const Model& target);
+void repositionTarget(glm::mat4& modelMatrix);
 
 // settings FHD
-const unsigned int SCR_WIDTH = 1920; 
-const unsigned int SCR_HEIGHT = 1080;
+//const unsigned int SCR_WIDTH = 1920; 
+//const unsigned int SCR_HEIGHT = 1080;
 
 // settings 2K
-//const unsigned int SCR_WIDTH = 2560;
-//const unsigned int SCR_HEIGHT = 1440;
+const unsigned int SCR_WIDTH = 2560;
+const unsigned int SCR_HEIGHT = 1440;
 
 // Límites para el movimiento de la cámara en el mapa 100x100
 const float X_MIN_LIMIT = 0.0f;
@@ -55,6 +63,10 @@ float lastFrame = 0.0f;
 bool showDeagle = false;
 bool showM4 = false;
 bool showBayonet = true;
+
+Model target;
+glm::mat4 targetModelMatrix = glm::mat4(1.0f);
+
 
 int main()
 {
@@ -102,14 +114,19 @@ int main()
     Shader ourShader("shaders/shader_exercise16_mloading.vs", "shaders/shader_exercise16_mloading.fs");
 
     // load models
-    //Model ourModel(FileSystem::getPath("resources/objects/backpack/backpack.obj"));
-    //Model ourModel("D:/LEONARDO/VisualStudio/OpenGL/OpenGL/model/baphomet/baphomet.obj");
     Model deagle("model/deagle/deagle.gltf");
     Model m4("model/m4/m4.gltf");
-    Model skybox("model/skybox/skybox.gltf"); 
-    Model target("model/target/target.gltf");
+    Model skybox("model/skybox/skybox.gltf");
     Model logo("model/logo/logo.gltf");
     Model bayonet("model/bayonet/bayonet.gltf");
+    
+    target = Model("model/target/target.gltf");
+
+    // model target
+    targetModelMatrix = glm::translate(targetModelMatrix, glm::vec3(10.0f, 2.0f, 50.0f)); // Posición inicial
+    targetModelMatrix = glm::rotate(targetModelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    targetModelMatrix = glm::rotate(targetModelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    targetModelMatrix = glm::scale(targetModelMatrix, glm::vec3(0.2f, 0.2f, 0.2f)); // Escala inicial
 
     float vertices[] = {
        // Coordenadas XYZ         // Normales XYZ           // Coordenadas de textura UV
@@ -243,13 +260,13 @@ int main()
         }
 
         //TARGET
-        glm::mat4 targetMatrix = glm::mat4(1.0f);
+        /*glm::mat4 targetMatrix = glm::mat4(1.0f);
         targetMatrix = glm::translate(targetMatrix, glm::vec3(10.0f, 2.0f, 50.0f));
         targetMatrix = glm::rotate(targetMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         targetMatrix = glm::rotate(targetMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         targetMatrix = glm::scale(targetMatrix, glm::vec3(0.2f, 0.2f, 0.2f));
         ourShader.setMat4("model", targetMatrix);
-        target.Draw(ourShader);
+        target.Draw(ourShader);*/
 
         // SKYBOX
         drawSkybox(ourShader, view, projection, skybox);
@@ -266,7 +283,15 @@ int main()
         // Dibujar Bayonet
         else if (showBayonet) {
             drawBayonet(ourShader, view, projection, bayonet);
-        }                    
+        }   
+
+        // Verificar la acción de disparo
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+            shootRayFromCamera(camera, target, targetModelMatrix);
+        }
+
+        ourShader.setMat4("model", targetModelMatrix);
+        target.Draw(ourShader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwSwapBuffers(window);
@@ -316,6 +341,12 @@ void processInput(GLFWwindow* window)
         showBayonet = true;
     }
 
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        // El botón izquierdo del mouse fue presionado, realizar disparo
+        glm::mat4 targetModelMatrix; // Deberías tener esta matriz definida en algún lugar relevante
+        shootRayFromCamera(camera, target, targetModelMatrix);
+    }
+
     // Restricciones de movimiento en el eje Y ya aplicadas previamente
     // Restricciones en los ejes X y Z
     //newPosition.x = glm::clamp(newPosition.x, X_MIN_LIMIT, X_MAX_LIMIT);
@@ -324,6 +355,92 @@ void processInput(GLFWwindow* window)
     // Aplicar la nueva posición
     //camera.Position = newPosition;
 }
+
+
+void shootRayFromCamera(Camera& camera, Model& target, glm::mat4& targetModelMatrix) {
+    glm::vec3 rayOrigin = camera.Position;
+    glm::vec3 rayDirection = camera.Front; // Asumiendo que 'Front' es la dirección en la que la cámara está mirando
+    checkRayIntersection(rayOrigin, rayDirection, targetModelMatrix, target);
+}
+
+bool intersectRayTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDir, const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, float& t) {
+    const float EPSILON = 0.0000001f;
+    glm::vec3 edge1, edge2, h, s, q;
+    float a, f, u, v;
+    edge1 = v1 - v0;
+    edge2 = v2 - v0;
+    h = glm::cross(rayDir, edge2);
+    a = glm::dot(edge1, h);
+    if (a > -EPSILON && a < EPSILON)
+        return false;    // El rayo es paralelo al triángulo.
+    f = 1.0 / a;
+    s = rayOrigin - v0;
+    u = f * glm::dot(s, h);
+    if (u < 0.0 || u > 1.0)
+        return false;
+    q = glm::cross(s, edge1);
+    v = f * glm::dot(rayDir, q);
+    if (v < 0.0 || u + v > 1.0)
+        return false;
+    // En este punto sabemos que hay una intersección en la línea del rayo, pero no si el rayo realmente la intersecta.
+    t = f * glm::dot(edge2, q);
+    if (t > EPSILON) // Intersección con el rayo
+        return true;
+
+    return false;
+}
+
+bool intersectsTargetRayTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, const Model& model) {
+    for (const Mesh& mesh : model.meshes) {
+        for (size_t i = 0; i < mesh.indices.size(); i += 3) {
+            glm::vec3 v0 = mesh.vertices[mesh.indices[i]].Position;
+            glm::vec3 v1 = mesh.vertices[mesh.indices[i + 1]].Position;
+            glm::vec3 v2 = mesh.vertices[mesh.indices[i + 2]].Position;
+
+            float t = 0.0f;
+            if (intersectRayTriangle(rayOrigin, rayDirection, v0, v1, v2, t)) {
+                return true; // Intersecta
+            }
+        }
+    }
+    return false; // No intersecta
+}
+
+void checkRayIntersection(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, glm::mat4& targetModelMatrix, const Model& target) {
+    if (intersectsTargetRayTriangle(rayOrigin, rayDirection, target)) {
+        // Intersecta con el target, reposiciona el target usando la matriz de modelo
+        repositionTarget(targetModelMatrix);
+    }
+}
+
+glm::vec3 aiVector3DToGlmVec3(const aiVector3D& v) {
+    return glm::vec3(v.x, v.y, v.z);
+}
+
+void repositionTarget(glm::mat4& modelMatrix) {
+    std::random_device rd; // Obtener un número aleatorio del dispositivo
+    std::mt19937 gen(rd()); // Semilla
+    std::uniform_real_distribution<> dis(-10.0, 10.0); // Rango
+
+    // Generar nueva posición
+    glm::vec3 newPosition(dis(gen), dis(gen), dis(gen));
+
+    modelMatrix = glm::translate(modelMatrix, glm::vec3(10.0f, 2.0f, 50.0f));
+
+    // Crear una nueva matriz de modelo para el target basada en la nueva posición
+    modelMatrix = glm::mat4(1.0f); // Inicializar a matriz identidad
+    modelMatrix = glm::translate(modelMatrix, newPosition); // Aplicar la nueva posición
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f, 0.2f, 0.2f));
+
+    // Asumiendo que no necesitas cambiar la orientación o escala del target. Si lo necesitas, aquí puedes aplicarlo.
+}
+
+
+
+
+
 
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
