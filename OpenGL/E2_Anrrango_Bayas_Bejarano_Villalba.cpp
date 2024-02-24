@@ -22,6 +22,9 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 unsigned int loadTexture(const char* path);
+void drawM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& m4);
+void drawDeagle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& deagle);
+void drawBayonet(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& bayonet);
 
 // settings
 const unsigned int SCR_WIDTH = 1920;
@@ -34,7 +37,8 @@ const float Z_MIN_LIMIT = 0.0f;
 const float Z_MAX_LIMIT = 100.0f;
 
 // camera
-Camera camera(glm::vec3(10.0f, 3.0f, 50.0f));
+//Camera camera(glm::vec3(0.0f, 3.2f, 0.0f)); //Modelar armas
+Camera camera(glm::vec3(10.0f, 3.2f, 50.0f)); // Armas listas
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -42,6 +46,11 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+// visualizar armas
+bool showDeagle = false;
+bool showM4 = false;
+bool showBayonet = true;
 
 int main()
 {
@@ -97,68 +106,67 @@ int main()
     //Model ourModel(FileSystem::getPath("resources/objects/backpack/backpack.obj"));
     //Model ourModel("D:/LEONARDO/VisualStudio/OpenGL/OpenGL/model/baphomet/baphomet.obj");
     Model deagle("model/deagle/deagle.gltf");
-    Model m4Model("model/m4/m4.gltf");
-    Model skyboxModel("model/skybox/skybox.gltf"); 
-    Model targetModel("model/target/target.gltf");
-    Model logoModel("model/logo/logo.gltf");
-    Model riyadhsModel("model/riyadhs/riyadhs.gltf");
+    Model m4("model/m4/m4.gltf");
+    Model skybox("model/skybox/skybox.gltf"); 
+    Model target("model/target/target.gltf");
+    Model logo("model/logo/logo.gltf");
+    Model bayonet("model/bayonet/bayonet.gltf");
 
     float vertices[] = {
         // Coordenadas XYZ         // Normales XYZ          // Coordenadas de textura UV
        // Cara trasera
-       -0.5f, -0.5f, -0.5f,       0.0f,  0.0f, -1.0f,       0.5343f, 0.5f,    // Esquina inferior izquierda
-        0.5f, -0.5f, -0.5f,       0.0f,  0.0f, -1.0f,       0.7291f, 0.3264f,    // Esquina inferior derecha    
-        0.5f,  0.5f, -0.5f,       0.0f,  0.0f, -1.0f,       0.7291f, 0.3264f, // Esquina superior derecha              
-        0.5f,  0.5f, -0.5f,       0.0f,  0.0f, -1.0f,       0.7291f, 0.3264f, // Esquina superior derecha
-       -0.5f,  0.5f, -0.5f,       0.0f,  0.0f, -1.0f,       0.5343f, 0.5f, // Esquina superior izquierda
-       -0.5f, -0.5f, -0.5f,       0.0f,  0.0f, -1.0f,       0.5343f, 0.5f,    // Esquina inferior izquierda                
+       -0.6f, -0.6f, -0.6f,       0.0f,  0.0f, -1.0f,       0.5343f, 0.51f,    // Esquina inferior izquierda
+        0.6f, -0.6f, -0.6f,       0.0f,  0.0f, -1.0f,       0.7291f, 0.3264f,    // Esquina inferior derecha    
+        0.6f,  0.6f, -0.6f,       0.0f,  0.0f, -1.0f,       0.7291f, 0.3264f, // Esquina superior derecha              
+        0.6f,  0.6f, -0.6f,       0.0f,  0.0f, -1.0f,       0.7291f, 0.3264f, // Esquina superior derecha
+       -0.6f,  0.6f, -0.6f,       0.0f,  0.0f, -1.0f,       0.5343f, 0.51f, // Esquina superior izquierda
+       -0.6f, -0.6f, -0.6f,       0.0f,  0.0f, -1.0f,       0.5343f, 0.51f,    // Esquina inferior izquierda                
 
        // Cara frontal
-       -0.5f, -0.5f,  0.5f,       0.0f,  0.0f,  1.0f,       0.5343f, 0.5f,    // Esquina inferior izquierda
-        0.5f,  0.5f,  0.5f,       0.0f,  0.0f,  1.0f,       0.7291f, 0.3264f, // Esquina superior derecha
-        0.5f, -0.5f,  0.5f,       0.0f,  0.0f,  1.0f,       0.7291f, 0.3264f,    // Esquina inferior derecha        
-        0.5f,  0.5f,  0.5f,       0.0f,  0.0f,  1.0f,       0.7291f, 0.3264f, // Esquina superior derecha
-       -0.5f, -0.5f,  0.5f,       0.0f,  0.0f,  1.0f,       0.5343f, 0.5f,    // Esquina inferior izquierda
-       -0.5f,  0.5f,  0.5f,       0.0f,  0.0f,  1.0f,       0.5343f, 0.3264f, // Esquina superior izquierda        
+       -0.6f, -0.6f,  0.6f,       0.0f,  0.0f,  1.0f,       0.5343f, 0.51f,    // Esquina inferior izquierda
+        0.6f,  0.6f,  0.6f,       0.0f,  0.0f,  1.0f,       0.7291f, 0.3264f, // Esquina superior derecha
+        0.6f, -0.6f,  0.6f,       0.0f,  0.0f,  1.0f,       0.7291f, 0.3264f,    // Esquina inferior derecha        
+        0.6f,  0.6f,  0.6f,       0.0f,  0.0f,  1.0f,       0.7291f, 0.3264f, // Esquina superior derecha
+       -0.6f, -0.6f,  0.6f,       0.0f,  0.0f,  1.0f,       0.5343f, 0.51f,    // Esquina inferior izquierda
+       -0.6f,  0.6f,  0.6f,       0.0f,  0.0f,  1.0f,       0.5343f, 0.3264f, // Esquina superior izquierda        
 
        // Cara izquierda
-       -0.5f,  0.5f,  0.5f,       -1.0f, 0.0f,  0.0f,       0.7291f, 0.3264f, // Esquina superior derecha
-       -0.5f, -0.5f, -0.5f,       -1.0f, 0.0f,  0.0f,       0.925f, 0.5f,      // Esquina inferior izquierda
-       -0.5f,  0.5f, -0.5f,       -1.0f, 0.0f,  0.0f,       0.925f, 0.3264f,   // Esquina superior izquierda       
-       -0.5f, -0.5f, -0.5f,       -1.0f, 0.0f,  0.0f,       0.925f, 0.5f,      // Esquina inferior izquierda
-       -0.5f,  0.5f,  0.5f,       -1.0f, 0.0f,  0.0f,       0.7291f, 0.3264f, // Esquina superior derecha
-       -0.5f, -0.5f,  0.5f,       -1.0f, 0.0f,  0.0f,       0.7291f, 0.5f,    // Esquina inferior derecha
+       -0.6f,  0.6f,  0.6f,       -1.0f, 0.0f,  0.0f,       0.7291f, 0.3264f, // Esquina superior derecha
+       -0.6f, -0.6f, -0.6f,       -1.0f, 0.0f,  0.0f,       0.925f, 0.51f,      // Esquina inferior izquierda
+       -0.6f,  0.6f, -0.6f,       -1.0f, 0.0f,  0.0f,       0.925f, 0.3264f,   // Esquina superior izquierda       
+       -0.6f, -0.6f, -0.6f,       -1.0f, 0.0f,  0.0f,       0.925f, 0.51f,      // Esquina inferior izquierda
+       -0.6f,  0.6f,  0.6f,       -1.0f, 0.0f,  0.0f,       0.7291f, 0.3264f, // Esquina superior derecha
+       -0.6f, -0.6f,  0.6f,       -1.0f, 0.0f,  0.0f,       0.7291f, 0.51f,    // Esquina inferior derecha
 
        // Cara derecha
-        0.5f,  0.5f,  0.5f,       1.0f,  0.0f,  0.0f,       0.5343f, 0.3264f, // Esquina superior izquierda
-        0.5f,  0.5f, -0.5f,       1.0f,  0.0f,  0.0f,       0.3385f, 0.3264f, // Esquina superior derecha      
-        0.5f, -0.5f, -0.5f,       1.0f,  0.0f,  0.0f,       0.3385f, 0.5f,    // Esquina inferior derecha          
-        0.5f, -0.5f, -0.5f,       1.0f,  0.0f,  0.0f,       0.3385f, 0.5f,    // Esquina inferior derecha
-        0.5f, -0.5f,  0.5f,       1.0f,  0.0f,  0.0f,       0.5343f, 0.5f,    // Esquina inferior izquierda
-        0.5f,  0.5f,  0.5f,       1.0f,  0.0f,  0.0f,       0.5343f, 0.3264f, // Esquina superior izquierda
+        0.6f,  0.6f,  0.6f,       1.0f,  0.0f,  0.0f,       0.5343f, 0.3264f, // Esquina superior izquierda
+        0.6f,  0.6f, -0.6f,       1.0f,  0.0f,  0.0f,       0.3385f, 0.3264f, // Esquina superior derecha      
+        0.6f, -0.6f, -0.6f,       1.0f,  0.0f,  0.0f,       0.3385f, 0.51f,    // Esquina inferior derecha          
+        0.6f, -0.6f, -0.6f,       1.0f,  0.0f,  0.0f,       0.3385f, 0.51f,    // Esquina inferior derecha
+        0.6f, -0.6f,  0.6f,       1.0f,  0.0f,  0.0f,       0.5343f, 0.51f,    // Esquina inferior izquierda
+        0.6f,  0.6f,  0.6f,       1.0f,  0.0f,  0.0f,       0.5343f, 0.3264f, // Esquina superior izquierda
 
         // Cara inferior          
-        -0.5f, -0.5f, -0.5f,       0.0f, -1.0f,  0.0f,       0.5343f, 0.7435f, // Esquina superior derecha
-         0.5f, -0.5f,  0.5f,       0.0f, -1.0f,  0.0f,       0.7291f, 0.5f,    // Esquina inferior izquierda
-         0.5f, -0.5f, -0.5f,       0.0f, -1.0f,  0.0f,       0.7291f, 0.7435f, // Esquina superior izquierda        
-         0.5f, -0.5f,  0.5f,       0.0f, -1.0f,  0.0f,       0.7291f, 0.5f,    // Esquina inferior izquierda
-        -0.5f, -0.5f, -0.5f,       0.0f, -1.0f,  0.0f,       0.5343f, 0.7435f, // Esquina superior derecha
-        -0.5f, -0.5f,  0.5f,       0.0f, -1.0f,  0.0f,       0.5343f, 0.5f,    // Esquina inferior derecha
+        -0.6f, -0.6f, -0.6f,       0.0f, -1.0f,  0.0f,       0.5343f, 0.7435f, // Esquina superior derecha
+         0.6f, -0.6f,  0.6f,       0.0f, -1.0f,  0.0f,       0.7291f, 0.51f,    // Esquina inferior izquierda
+         0.6f, -0.6f, -0.6f,       0.0f, -1.0f,  0.0f,       0.7291f, 0.7435f, // Esquina superior izquierda        
+         0.6f, -0.6f,  0.6f,       0.0f, -1.0f,  0.0f,       0.7291f, 0.51f,    // Esquina inferior izquierda
+        -0.6f, -0.6f, -0.6f,       0.0f, -1.0f,  0.0f,       0.5343f, 0.7435f, // Esquina superior derecha
+        -0.6f, -0.6f,  0.6f,       0.0f, -1.0f,  0.0f,       0.5343f, 0.51f,    // Esquina inferior derecha
 
         // Cara superior
-        -0.5f,  0.5f, -0.5f,       0.0f,  1.0f,  0.0f,       0.5343f, 0.5f,  // Esquina superior izquierda
-         0.5f,  0.5f, -0.5f,       0.0f,  1.0f,  0.0f,       0.925f, 0.5f,  // Esquina superior derecha
-         0.5f,  0.5f,  0.5f,       0.0f,  1.0f,  0.0f,       0.7291f, 0.3264f, // Esquina inferior derecha                 
-         0.5f,  0.5f,  0.5f,       0.0f,  1.0f,  0.0f,       0.7291f, 0.3264f, // Esquina inferior derecha
-        -0.5f,  0.5f,  0.5f,       0.0f,  1.0f,  0.0f,       0.5343f, 0.5f,  // Esquina inferior izquierda  
-        -0.5f,  0.5f, -0.5f,       0.0f,  1.0f,  0.0f,       0.5343f, 0.3264f  // Esquina superior izquierda  
+        -0.6f,  0.6f, -0.6f,       0.0f,  1.0f,  0.0f,       0.5343f, 0.51f,  // Esquina superior izquierda
+         0.6f,  0.6f, -0.6f,       0.0f,  1.0f,  0.0f,       0.925f, 0.51f,  // Esquina superior derecha
+         0.6f,  0.6f,  0.6f,       0.0f,  1.0f,  0.0f,       0.7291f, 0.3264f, // Esquina inferior derecha                 
+         0.6f,  0.6f,  0.6f,       0.0f,  1.0f,  0.0f,       0.7291f, 0.3264f, // Esquina inferior derecha
+        -0.6f,  0.6f,  0.6f,       0.0f,  1.0f,  0.0f,       0.5343f, 0.51f,  // Esquina inferior izquierda  
+        -0.6f,  0.6f, -0.6f,       0.0f,  1.0f,  0.0f,       0.5343f, 0.3264f  // Esquina superior izquierda  
     };
 
-    //SUELOOOOOOOOOOOOOOO
+    //SUELO
     // Ajustar el tamaño de este array para contener 10,000 posiciones (100 filas de 100)
 
     glm::vec3 cubePositions[10000];
-
     // Llenar el array con posiciones para crear 100 filas de 100 cubos cada una
     int index = 0; // Índice para llenar el arreglo
     for (int j = 0; j < 100; j++) { // 10 filas
@@ -166,7 +174,6 @@ int main()
             cubePositions[index++] = glm::vec3(i, 0.0f, j); // Ajusta 'i' y 'j' para cambiar la columna y la fila, respectivamente
         }
     }
-
 
     // first, configure the cube's VAO (and VBO)
     unsigned int VBO, cubeVAO;
@@ -184,9 +191,7 @@ int main()
     // normal attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-
-
-   //texture attribute
+    //texture attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
@@ -227,8 +232,8 @@ int main()
         glBindTexture(GL_TEXTURE_2D, diffuseMap1);
         
 
-        // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+        // view / projection / transformations
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1500.0f);
         glm::mat4 view = camera.GetViewMatrix();
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
@@ -246,7 +251,7 @@ int main()
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
-        // render the loaded model
+        //TARGET
         /*float angle = 90.0f;
         glm::mat4 model = glm::mat4(1.0f);
         //model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f)); // translate it down so it's at the center of the scene
@@ -256,21 +261,29 @@ int main()
         ourShader.setMat4("model", model);
         targetModel.Draw(ourShader);*/
 
-        // DIBUJAR DEAGLE
-        glm::mat4 gunMatrix = glm::mat4(1.0f);
-        // Ajuste de la traslación para posicionar el arma más atrás y más abajo
-        gunMatrix = glm::translate(gunMatrix, glm::vec3(0.53f, -1.0f, -0.80f)); // Arma perfecta
-        gunMatrix = glm::rotate(gunMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Giro para orientación correcta
-        gunMatrix = glm::rotate(gunMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Giro hacia la cámara
-        // Escala el arma para mantener proporciones realistasw
-        gunMatrix = glm::scale(gunMatrix, glm::vec3(0.16f)); // Ajusta según el tamaño de tu modelo
-        gunMatrix = glm::inverse(view) * gunMatrix;
-        // Aplicar la matriz del modelo en el shader y dibujar el arma
-        ourShader.use();
-        ourShader.setMat4("projection", projection);
-        ourShader.setMat4("view", view);
-        ourShader.setMat4("model", gunMatrix);
-        deagle.Draw(ourShader);
+        // SKYBOX
+        glm::mat4 skyboxMatrix = glm::mat4(1.0f);
+        skyboxMatrix = glm::translate(skyboxMatrix, glm::vec3(50.0f, 0.0f, 50.0f));
+        skyboxMatrix = glm::rotate(skyboxMatrix, glm::radians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        skyboxMatrix = glm::rotate(skyboxMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        skyboxMatrix = glm::scale(skyboxMatrix, glm::vec3(1000.0f));
+        ourShader.setMat4("model", skyboxMatrix);
+        skybox.Draw(ourShader);
+
+        // Decidir qué arma dibujar
+        // DEAGLE
+        if (showDeagle) { 
+            drawDeagle(ourShader, view, projection, deagle);
+        }
+        // M4
+        else if (showM4) {
+            drawM4(ourShader, view, projection, m4);
+        }
+        // BAYONET
+        else if (showBayonet) {
+            drawBayonet(ourShader, view, projection, bayonet);
+        }
+
                     
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -306,6 +319,23 @@ void processInput(GLFWwindow* window)
 
     // Mantener la altura constante
     camera.Position.y = currentCameraY; // Restablecer la posición Y de la cámara a su valor original
+
+    // Alternar entre las armas
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+        showDeagle = false;
+        showM4 = true;
+        showBayonet = false;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+        showDeagle = true;
+        showM4 = false;
+        showBayonet = false;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
+        showDeagle = false;
+        showM4 = false;
+        showBayonet = true;
+    }
 
     // Restricciones de movimiento en el eje Y ya aplicadas previamente
     // Restricciones en los ejes X y Z
@@ -388,4 +418,36 @@ unsigned int loadTexture(char const* path)
     }
 
     return textureID;
+}
+
+void drawDeagle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& deagle) {
+    glm::mat4 pistolaMatrix = glm::mat4(1.0f);
+    pistolaMatrix = glm::translate(pistolaMatrix, glm::vec3(0.21f, -0.4f, -0.38f));
+    pistolaMatrix = glm::rotate(pistolaMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    pistolaMatrix = glm::rotate(pistolaMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    pistolaMatrix = glm::scale(pistolaMatrix, glm::vec3(0.06f));
+    pistolaMatrix = glm::inverse(view) * pistolaMatrix;
+    shader.setMat4("model", pistolaMatrix);
+    deagle.Draw(shader);
+}
+
+void drawM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& m4) {
+    glm::mat4 armaMatrix = glm::mat4(1.0f);
+    armaMatrix = glm::translate(armaMatrix, glm::vec3(0.28f, -0.7f, -0.1f));
+    armaMatrix = glm::rotate(armaMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    armaMatrix = glm::scale(armaMatrix, glm::vec3(0.04f));
+    armaMatrix = glm::inverse(view) * armaMatrix;
+    shader.setMat4("model", armaMatrix);
+    m4.Draw(shader);
+}
+
+void drawBayonet(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& bayonet) {
+    glm::mat4 cuchilloMatrix = glm::mat4(1.0f);
+    cuchilloMatrix = glm::translate(cuchilloMatrix, glm::vec3(0.38f, -0.4f, -1.0f));
+    cuchilloMatrix = glm::rotate(cuchilloMatrix, glm::radians(215.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    cuchilloMatrix = glm::rotate(cuchilloMatrix, glm::radians(18.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    cuchilloMatrix = glm::scale(cuchilloMatrix, glm::vec3(0.05f));
+    cuchilloMatrix = glm::inverse(view) * cuchilloMatrix;
+    shader.setMat4("model", cuchilloMatrix);
+    bayonet.Draw(shader);
 }
