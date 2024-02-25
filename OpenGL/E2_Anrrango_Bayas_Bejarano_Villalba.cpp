@@ -25,6 +25,7 @@ unsigned int loadTexture(const char* path);
 void drawM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& m4);
 void drawDeagle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& deagle);
 void drawBayonet(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& bayonet);
+void drawReticle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& reticle2d);
 
 // settings
 const unsigned int SCR_WIDTH = 1920;
@@ -51,6 +52,8 @@ float lastFrame = 0.0f;
 bool showDeagle = false;
 bool showM4 = false;
 bool showBayonet = true;
+
+
 
 int main()
 {
@@ -111,6 +114,7 @@ int main()
     Model target("model/target/target.gltf");
     Model logo("model/logo/logo.gltf");
     Model bayonet("model/bayonet/bayonet.gltf");
+    Model reticle2d("model/mira4/miragreen.gltf");
 
     float vertices[] = {
         // Coordenadas XYZ         // Normales XYZ          // Coordenadas de textura UV
@@ -162,6 +166,7 @@ int main()
         -0.6f,  0.6f,  0.6f,       0.0f,  1.0f,  0.0f,       0.5343f, 0.51f,  // Esquina inferior izquierda  
         -0.6f,  0.6f, -0.6f,       0.0f,  1.0f,  0.0f,       0.5343f, 0.3264f  // Esquina superior izquierda  
     };
+    
 
     //SUELO
     // Ajustar el tamaño de este array para contener 10,000 posiciones (100 filas de 100)
@@ -174,6 +179,7 @@ int main()
             cubePositions[index++] = glm::vec3(i, 0.0f, j); // Ajusta 'i' y 'j' para cambiar la columna y la fila, respectivamente
         }
     }
+    
 
     // first, configure the cube's VAO (and VBO)
     unsigned int VBO, cubeVAO;
@@ -270,9 +276,13 @@ int main()
         ourShader.setMat4("model", skyboxMatrix);
         skybox.Draw(ourShader);
 
+        // Mira
+        drawReticle(ourShader, view, projection, reticle2d);
+      
+
         // Decidir qué arma dibujar
         // DEAGLE
-        if (showDeagle) { 
+        if (showDeagle) {
             drawDeagle(ourShader, view, projection, deagle);
         }
         // M4
@@ -283,9 +293,7 @@ int main()
         else if (showBayonet) {
             drawBayonet(ourShader, view, projection, bayonet);
         }
-
-                    
-
+     
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -450,4 +458,15 @@ void drawBayonet(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& 
     cuchilloMatrix = glm::inverse(view) * cuchilloMatrix;
     shader.setMat4("model", cuchilloMatrix);
     bayonet.Draw(shader);
+}
+
+void drawReticle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& reticle2d) {
+    glm::mat4 reticleMatrix = glm::mat4(1.0f);
+    reticleMatrix = glm::translate(reticleMatrix, glm::vec3(0.0f, 0.0f, -0.30f)); // Moviendo más cerca
+    reticleMatrix = glm::rotate(reticleMatrix, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    reticleMatrix = glm::rotate(reticleMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 1.0f));
+    reticleMatrix = glm::scale(reticleMatrix, glm::vec3(0.003f)); // Haciendo la mira más pequeña
+    reticleMatrix = glm::inverse(view) * reticleMatrix;
+    shader.setMat4("model", reticleMatrix);
+    reticle2d.Draw(shader);
 }
