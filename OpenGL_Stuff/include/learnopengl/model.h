@@ -31,11 +31,17 @@ public:
     vector<Mesh>    meshes;
     string directory;
     bool gammaCorrection;
+    glm::mat4 ModelMatrix;
 
-    // constructor, expects a filepath to a 3D model.
-    Model(string const &path, bool gamma = false) : gammaCorrection(gamma)
-    {
+    // Constructor predeterminado
+    Model() : gammaCorrection(false) {
+        // Aquí podrías inicializar variables o dejarlo vacío si no hay nada que inicializar.
+    }
+
+    // Constructor existente que carga un modelo desde una ruta de archivo.
+    Model(string const& path, bool gamma = false) {
         loadModel(path);
+        ModelMatrix = glm::mat4(1.0f); // Inicializa la matriz de modelo a la identidad
     }
 
     // draws the model, and thus all its meshes
@@ -43,6 +49,14 @@ public:
     {
         for(unsigned int i = 0; i < meshes.size(); i++)
             meshes[i].Draw(shader);
+    }
+
+    void SetPosition(const glm::vec3& position) {
+        ModelMatrix = glm::translate(glm::mat4(1.0f), position); // Establece la posición del modelo
+    }
+
+    glm::vec3 GetPosition() const {
+        return glm::vec3(ModelMatrix[3]); // Obtiene la posición del modelo
     }
     
 private:
