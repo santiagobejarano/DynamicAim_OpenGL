@@ -11,10 +11,11 @@
 
 #include <iostream>
 
-#define STB_IMAGE_IMPLEMENTATION 
-#include <learnopengl/stb_image.h>
 #include <vector>
 #include <random>
+
+#define STB_IMAGE_IMPLEMENTATION 
+#include <learnopengl/stb_image.h>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -27,6 +28,8 @@ void drawM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& m4);
 void drawDeagle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& deagle);
 void drawBayonet(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& bayonet);
 void drawSkybox(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& skybox);
+void drawShootDeagle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& shootD);
+void drawShootM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& shootM);
 
 void shootRayFromCamera(Camera& camera, Model& target, glm::mat4& targetModelMatrix);
 bool intersectRayTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDir, const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, float& t);
@@ -35,15 +38,14 @@ void checkRayIntersection(const glm::vec3& rayOrigin, const glm::vec3& rayDirect
 void repositionTarget(glm::mat4& modelMatrix, const glm::vec3& currentPosition);
 
 // settings FHD
-//const unsigned int SCR_WIDTH = 1920; 
-//const unsigned int SCR_HEIGHT = 1080;
+const unsigned int SCR_WIDTH = 1920; 
+const unsigned int SCR_HEIGHT = 1080;
 
 // settings 2K
-const unsigned int SCR_WIDTH = 2560;
-const unsigned int SCR_HEIGHT = 1440;
+//const unsigned int SCR_WIDTH = 2560;
+//const unsigned int SCR_HEIGHT = 1440;
 
 // Camera
-//Camera camera(glm::vec3(0.0f, 3.2f, 0.0f)); //Modelar armas
 Camera camera(glm::vec3(20.0f, 3.2f, 50.0f)); // Armas listas
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
@@ -57,6 +59,11 @@ float lastFrame = 0.0f;
 bool showDeagle = false;
 bool showM4 = false;
 bool showBayonet = true;
+
+// visualizar disparo
+bool isShooting = false; // Estado del disparo
+float shootTime = 0.0f; // Tiempo desde que se disparó
+float shootDuration = 0.1f; // Duración visible del disparo
 
 Model target;
 glm::mat4 targetModelMatrix = glm::mat4(1.0f);
@@ -113,6 +120,8 @@ int main()
     Model skybox("model/skybox/skybox.gltf");
     Model logo("model/logo/logo.gltf");
     Model bayonet("model/bayonet/bayonet.gltf");
+    Model shootD("model/shoot/shootD.gltf");
+    Model shootM("model/shoot/shootM.gltf");
     
     target = Model("model/target/target.gltf");
 
@@ -259,25 +268,42 @@ int main()
         // SKYBOX
         drawSkybox(ourShader, view, projection, skybox);
 
-        // Decidir qué arma dibujar
-        // Dibujar Deagle
-        if (showDeagle) { 
+        // Dibujar el arma seleccionada
+        if (showDeagle) {
             drawDeagle(ourShader, view, projection, deagle);
         }
-        // Dibujar M4
         else if (showM4) {
             drawM4(ourShader, view, projection, m4);
         }
-        // Dibujar Bayonet
         else if (showBayonet) {
             drawBayonet(ourShader, view, projection, bayonet);
-        }   
+        }
+
+        // Manejar la lógica del disparo
+        if (isShooting) {
+            shootTime += deltaTime; // Actualiza el tiempo desde que se disparó
+
+            if (shootTime < shootDuration) {
+                // Dibuja el efecto de disparo dependiendo del arma seleccionada
+                if (showDeagle) {
+                    drawShootDeagle(ourShader, view, projection, shootD);
+                    // sonido disparo
+                }
+                else if (showM4) {
+                    drawShootM4(ourShader, view, projection, shootM);
+                    // sonido disparo
+                }
+                // El bayonet no tiene efecto de disparo
+            }
+            else {
+                isShooting = false; // Termina el efecto de disparo
+            }
+        }
 
         // Verificar la acción de disparo
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
             shootRayFromCamera(camera, target, targetModelMatrix);
         }
-
         ourShader.setMat4("model", targetModelMatrix);
         target.Draw(ourShader);
 
@@ -330,6 +356,15 @@ void processInput(GLFWwindow* window)
     }
 
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        glm::mat4 targetModelMatrix;
+        shootRayFromCamera(camera, target, targetModelMatrix);
+    }
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !isShooting) {
+        isShooting = true; // Establece el estado de disparo a verdadero
+        shootTime = 0.0f; // Reinicia el contador de tiempo de disparo
+
+        // El resto de la lógica de disparo permanece igual
         glm::mat4 targetModelMatrix;
         shootRayFromCamera(camera, target, targetModelMatrix);
     }
@@ -540,4 +575,28 @@ void drawSkybox(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& s
     skyboxMatrix = glm::scale(skyboxMatrix, glm::vec3(1000.0f));
     shader.setMat4("model", skyboxMatrix);
     skybox.Draw(shader);
+}
+
+// Dibujar Disparo Deagle
+void drawShootDeagle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& shootD) {
+    glm::mat4 shootDeagleMatrix = glm::mat4(1.0f);
+    shootDeagleMatrix = glm::translate(shootDeagleMatrix, glm::vec3(0.32f, -0.22f, -1.50f));
+    shootDeagleMatrix = glm::rotate(shootDeagleMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    shootDeagleMatrix = glm::rotate(shootDeagleMatrix, glm::radians(-45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    shootDeagleMatrix = glm::scale(shootDeagleMatrix, glm::vec3(0.001f));
+    shootDeagleMatrix = glm::inverse(view) * shootDeagleMatrix;
+    shader.setMat4("model", shootDeagleMatrix);
+    shootD.Draw(shader);
+}
+
+// Dibujar Disparo M4
+void drawShootM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& shootM) {
+    glm::mat4 shootM4Matrix = glm::mat4(1.0f);
+    shootM4Matrix = glm::translate(shootM4Matrix, glm::vec3(0.27f, -0.20f, -1.65f));
+    shootM4Matrix = glm::rotate(shootM4Matrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    shootM4Matrix = glm::rotate(shootM4Matrix, glm::radians(-45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    shootM4Matrix = glm::scale(shootM4Matrix, glm::vec3(0.001f));
+    shootM4Matrix = glm::inverse(view) * shootM4Matrix;
+    shader.setMat4("model", shootM4Matrix);
+    shootM.Draw(shader);
 }
