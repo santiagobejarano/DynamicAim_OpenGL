@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
+#include <windows.h>
+using namespace std;
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -14,6 +15,9 @@
 #define STB_IMAGE_IMPLEMENTATION 
 #include <learnopengl/stb_image.h>
 #include <vector>
+
+#include <SFML/Audio.hpp>
+
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -51,6 +55,9 @@ float lastFrame = 0.0f;
 bool showDeagle = false;
 bool showM4 = false;
 bool showBayonet = true;
+
+
+
 
 int main()
 {
@@ -206,7 +213,9 @@ int main()
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     camera.MovementSpeed = 7; //Optional. Modify the speed of the camera
-
+    
+    
+    
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -220,6 +229,9 @@ int main()
         // input
         // -----
         processInput(window);
+
+       
+        
 
         // render
         // ------
@@ -274,10 +286,20 @@ int main()
         // DEAGLE
         if (showDeagle) { 
             drawDeagle(ourShader, view, projection, deagle);
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+            {
+                // Reproduce el sonido
+                bool played = PlaySound(TEXT("pistola2.wav"), NULL, SND_ASYNC);
+            }
         }
         // M4
         else if (showM4) {
             drawM4(ourShader, view, projection, m4);
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+            {
+                // Reproduce el sonido
+                bool played = PlaySound(TEXT("M4.wav"), NULL, SND_ASYNC);
+            }
         }
         // BAYONET
         else if (showBayonet) {
@@ -316,6 +338,7 @@ void processInput(GLFWwindow* window)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    
 
     // Mantener la altura constante
     camera.Position.y = currentCameraY; // Restablecer la posición Y de la cámara a su valor original
