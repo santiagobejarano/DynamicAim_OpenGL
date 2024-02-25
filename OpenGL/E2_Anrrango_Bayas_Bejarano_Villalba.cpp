@@ -23,7 +23,7 @@ using namespace std;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow* window);
 
 unsigned int loadTexture(const char* path);
 void drawM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& m4);
@@ -114,7 +114,7 @@ int main()
     //Model ourModel("D:/LEONARDO/VisualStudio/OpenGL/OpenGL/model/baphomet/baphomet.obj");
     Model deagle("model/deagle/deagle.gltf");
     Model m4("model/m4/m4.gltf");
-    Model skybox("model/skybox/skybox.gltf"); 
+    Model skybox("model/skybox/skybox.gltf");
     Model target("model/target/target.gltf");
     Model logo("model/logo/logo.gltf");
     Model bayonet("model/bayonet/bayonet.gltf");
@@ -208,14 +208,14 @@ int main()
     // --------------------
     ourShader.use();
     ourShader.setInt("material.diffuse1", 0); // Texture unit 0
-    
+
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     camera.MovementSpeed = 7; //Optional. Modify the speed of the camera
-    
-    
-    
+
+
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -230,8 +230,8 @@ int main()
         // -----
         processInput(window);
 
-       
-        
+
+
 
         // render
         // ------
@@ -242,7 +242,7 @@ int main()
         ourShader.use();
         glActiveTexture(GL_TEXTURE0); // Cambia a la unidad de textura de los cubos
         glBindTexture(GL_TEXTURE_2D, diffuseMap1);
-        
+
 
         // view / projection / transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1500.0f);
@@ -284,7 +284,7 @@ int main()
 
         // Decidir qué arma dibujar
         // DEAGLE
-        if (showDeagle) { 
+        if (showDeagle) {
             drawDeagle(ourShader, view, projection, deagle);
             if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
             {
@@ -306,7 +306,7 @@ int main()
             drawBayonet(ourShader, view, projection, bayonet);
         }
 
-                    
+
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -338,7 +338,7 @@ void processInput(GLFWwindow* window)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
-    
+
 
     // Mantener la altura constante
     camera.Position.y = currentCameraY; // Restablecer la posición Y de la cámara a su valor original
