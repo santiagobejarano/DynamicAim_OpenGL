@@ -101,7 +101,6 @@ int main()
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // glad: load all OpenGL function pointers
-    // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -137,7 +136,7 @@ int main()
     targetModelMatrix = glm::rotate(targetModelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     targetModelMatrix = glm::scale(targetModelMatrix, glm::vec3(0.2f, 0.2f, 0.2f)); // Escala inicial
 
-    camera.MovementSpeed = 7;
+    camera.MovementSpeed = 70;
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -255,15 +254,30 @@ void processInput(GLFWwindow* window) {
         glfwSetWindowShouldClose(window, true);
 
     float currentCameraY = camera.Position.y; // Guardar la posición Y actual de la cámara
+        
+    glm::vec3 newPosition = camera.Position;
 
+    // Movimiento y Restriccón de movimiento
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        newPosition += camera.Front * camera.MovementSpeed * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        newPosition -= camera.Front * camera.MovementSpeed * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        newPosition -= camera.Right * camera.MovementSpeed * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        newPosition += camera.Right * camera.MovementSpeed * deltaTime;
+
+    // Restringe la posición en el eje X
+    if (newPosition.x < -20.0f) newPosition.x = -20.0f;
+    if (newPosition.x > 40.0f) newPosition.x = 40.0f;
+
+    // Restringe la posición en el eje Z
+    if (newPosition.z < 0.0f) newPosition.z = 0.0f;
+    if (newPosition.z > 100.0f) newPosition.z = 100.0f;
+
+    // Aplica la posición ajustada, manteniendo constante la altura (eje Y)
+    camera.Position.x = newPosition.x;
+    camera.Position.z = newPosition.z;
 
     // Mantener la altura constante
     camera.Position.y = currentCameraY; // Restablecer la posición Y de la cámara a su valor original
