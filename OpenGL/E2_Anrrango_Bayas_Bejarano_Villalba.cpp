@@ -615,14 +615,15 @@ void drawShootM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& 
     shootM4Matrix = glm::inverse(view) * shootM4Matrix;
     shader.setMat4("model", shootM4Matrix);
     shootM4.Draw(shader);
+}
 
 // Dibujar Reticula
 void drawReticle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& reticle2d) {
     glm::mat4 reticleMatrix = glm::mat4(1.0f);
-    reticleMatrix = glm::translate(reticleMatrix, glm::vec3(0.0f, 0.0f, -0.30f)); // Moviendo m�s cerca
+    reticleMatrix = glm::translate(reticleMatrix, glm::vec3(0.0f, 0.0f, -0.30f));
     reticleMatrix = glm::rotate(reticleMatrix, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     reticleMatrix = glm::rotate(reticleMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 1.0f));
-    reticleMatrix = glm::scale(reticleMatrix, glm::vec3(0.003f)); // Haciendo la mira m�s peque�a
+    reticleMatrix = glm::scale(reticleMatrix, glm::vec3(0.0015f));
     reticleMatrix = glm::inverse(view) * reticleMatrix;
     shader.setMat4("model", reticleMatrix);
     reticle2d.Draw(shader);
@@ -631,8 +632,8 @@ void drawReticle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& 
   // Dibujar Logo
 void drawLogo(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& logo) {
     glm::mat4 logoMatrix = glm::mat4(1.0f);
-    logoMatrix = glm::translate(logoMatrix, glm::vec3(11.0f, 5.1f, 20.0f)); // Moviendo m�s cerca
-    logoMatrix = glm::scale(logoMatrix, glm::vec3(100.0f)); // Haciendo la mira m�s peque�a
+    logoMatrix = glm::translate(logoMatrix, glm::vec3(20.0f, 5.1f, 20.0f));
+    logoMatrix = glm::scale(logoMatrix, glm::vec3(100.0f));
     shader.setMat4("model", logoMatrix);
     logo.Draw(shader);
 }
