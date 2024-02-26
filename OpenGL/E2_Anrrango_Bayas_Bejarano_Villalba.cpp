@@ -26,6 +26,7 @@ void drawM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& m4);
 void drawDeagle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& deagle);
 void drawBayonet(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& bayonet);
 void drawReticle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& reticle2d);
+void drawLogo(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& logo);
 
 // settings
 const unsigned int SCR_WIDTH = 1920;
@@ -275,10 +276,12 @@ int main()
         skyboxMatrix = glm::scale(skyboxMatrix, glm::vec3(1000.0f));
         ourShader.setMat4("model", skyboxMatrix);
         skybox.Draw(ourShader);
-
+  
         // Mira
         drawReticle(ourShader, view, projection, reticle2d);
       
+        // logo
+        drawLogo(ourShader, view, projection, logo);
 
         // Decidir qué arma dibujar
         // DEAGLE
@@ -469,4 +472,15 @@ void drawReticle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& 
     reticleMatrix = glm::inverse(view) * reticleMatrix;
     shader.setMat4("model", reticleMatrix);
     reticle2d.Draw(shader);
+}
+
+void drawLogo(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& logo) {
+    glm::mat4 logoMatrix = glm::mat4(1.0f);
+    logoMatrix = glm::translate(logoMatrix, glm::vec3(11.0f, 5.1f, 20.0f)); // Moviendo más cerca
+    //logoMatrix = glm::rotate(logoMatrix, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    //logoMatrix = glm::rotate(logoMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 1.0f));
+    logoMatrix = glm::scale(logoMatrix, glm::vec3(100.0f)); // Haciendo la mira más pequeña
+    //logoMatrix = glm::inverse(view) * logoMatrix;
+    shader.setMat4("model", logoMatrix);
+    logo.Draw(shader);
 }
