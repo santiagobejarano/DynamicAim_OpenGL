@@ -1,7 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <windows.h>
-using namespace std;
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -15,6 +14,8 @@ using namespace std;
 #define STB_IMAGE_IMPLEMENTATION 
 #include <learnopengl/stb_image.h>
 #include <SFML/Audio.hpp>
+
+using namespace std;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -30,6 +31,7 @@ void drawLogo(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& log
 void drawSkybox(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& skybox);
 void drawShootDeagle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& shootD);
 void drawShootM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& shootM);
+void drawField(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& field);
 
 void shootRayFromCamera(Camera& camera, Model& target, glm::mat4& targetModelMatrix);
 bool intersectRayTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDir, const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, float& t);
@@ -81,7 +83,7 @@ int main()
 #endif
 
     // glfw window creation
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Dynamic Aim", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -124,6 +126,7 @@ int main()
     Model reticle2d("model/mira4/miragreen.gltf");
     Model shootD("model/shoot/shootD.gltf");
     Model shootM("model/shoot/shootM.gltf");
+    Model field("model/field/field.gltf");
     target = Model("model/target/target.gltf");
 
     targetModelMatrix = glm::translate(targetModelMatrix, glm::vec3(30.0f, 2.0f, 50.0f)); // Posición inicial
@@ -131,92 +134,7 @@ int main()
     targetModelMatrix = glm::rotate(targetModelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     targetModelMatrix = glm::scale(targetModelMatrix, glm::vec3(0.2f, 0.2f, 0.2f)); // Escala inicial
 
-    float floorVertices[] = {
-        // Coordenadas XYZ    // Normales XYZ      //Textura
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-    };
-
-    // SUELO PROVISIONAL
-    // Optimización para pruebas funcionales
-    // Falta modelo de isla
-    glm::vec3 cubePositions[10000];
-    int index = 0; // Índice para llenar el arreglo
-    for (int j = 0; j < 100; j++) { // 10 filas
-        for (int i = 0; i < 100; i++) { // 10 cubos por fila
-            cubePositions[index++] = glm::vec3(i, 0.0f, j); // Ajusta 'i' y 'j' para cambiar la columna y la fila, respectivamente
-        }
-    }
-
-    // first, configure the cube's VAO (and VBO)
-    unsigned int VBO, cubeVAO;
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &VBO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertices), floorVertices, GL_STATIC_DRAW);
-
-    glBindVertexArray(cubeVAO);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // normal attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    //texture attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    unsigned int diffuseMap1 = loadTexture("textures/concreto.jpg");
-
-    // shader configuration
-    ourShader.use();
-    ourShader.setInt("material.diffuse", 0); // Texture unit 0
-
-    // draw in wireframe
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    camera.MovementSpeed = 7; //Optional. Modify the speed of the camera
+    camera.MovementSpeed = 7;
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -233,11 +151,7 @@ int main()
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // don't forget to enable shader before setting uniforms
         ourShader.use();
-        glActiveTexture(GL_TEXTURE0); // Cambia a la unidad de textura de los cubos
-        glBindTexture(GL_TEXTURE_2D, diffuseMap1);
-
         // Se activa activar el shader para configurar las variables uniformes/dibujar objetos
         ourShader.setVec3("viewPos", camera.Position);
         ourShader.setFloat("material.shininess", 1000.0f);
@@ -254,30 +168,21 @@ int main()
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
 
-        glBindVertexArray(cubeVAO);
-
-        // Dibujar 10.000 cubos, para 
-        for (unsigned int i = 0; i < 10000; i++) {
-            // Transformación del mundo para este cubo
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            ourShader.setMat4("model", model);
-            // Dibuja el cubo
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-
-        //TARGET
+        // Target
         ourShader.setMat4("model", targetModelMatrix);
         target.Draw(ourShader);
 
-        // SKYBOX
+        // Sbybox
         drawSkybox(ourShader, view, projection, skybox);
  
         // Mira
         drawReticle(ourShader, view, projection, reticle2d);
       
-        // logo
+        // Logo
         drawLogo(ourShader, view, projection, logo);
+
+        // Field
+        drawField(ourShader, view, projection, field);
 
         // Dibujar el arma seleccionada
         if (showDeagle) {
@@ -306,11 +211,9 @@ int main()
                 // Dibuja el efecto de disparo dependiendo del arma seleccionada
                 if (showDeagle) {
                     drawShootDeagle(ourShader, view, projection, shootD);
-                    // sonido disparo
                 }
                 else if (showM4) {
                     drawShootM4(ourShader, view, projection, shootM);
-                    // sonido disparo
                 }
                 // El bayonet no tiene efecto de disparo
             }
@@ -337,13 +240,12 @@ int main()
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-void processInput(GLFWwindow* window)
-{
+void processInput(GLFWwindow* window) {
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
     float currentCameraY = camera.Position.y; // Guardar la posición Y actual de la cámara
-    glm::vec3 newPosition = camera.Position;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -353,7 +255,6 @@ void processInput(GLFWwindow* window)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
-
 
     // Mantener la altura constante
     camera.Position.y = currentCameraY; // Restablecer la posición Y de la cámara a su valor original
@@ -479,7 +380,6 @@ void repositionTarget(glm::mat4& modelMatrix, const glm::vec3& currentPosition) 
     modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 }
-
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -639,4 +539,16 @@ void drawLogo(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& log
     logoMatrix = glm::scale(logoMatrix, glm::vec3(100.0f));
     shader.setMat4("model", logoMatrix);
     logo.Draw(shader);
+}
+
+// Dibujar Field
+void drawField(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& field) {
+    glm::mat4 fieldMatrix = glm::mat4(1.0f);
+    fieldMatrix = glm::translate(fieldMatrix, glm::vec3(125.0f, -2.0f, 130.0f));
+    fieldMatrix = glm::rotate(fieldMatrix, glm::radians(120.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    fieldMatrix = glm::rotate(fieldMatrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    fieldMatrix = glm::rotate(fieldMatrix, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    fieldMatrix = glm::scale(fieldMatrix, glm::vec3(2.0f));
+    shader.setMat4("model", fieldMatrix);
+    field.Draw(shader);
 }
