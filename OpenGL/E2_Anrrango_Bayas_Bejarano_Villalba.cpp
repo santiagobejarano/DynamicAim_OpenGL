@@ -32,6 +32,8 @@ void drawSkybox(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& s
 void drawShootDeagle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& shootD);
 void drawShootM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& shootM);
 void drawField(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& field);
+void drawLamp1(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& lamp1);
+void drawLamp2(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& lamp2);
 
 void shootRayFromCamera(Camera& camera, Model& target, glm::mat4& targetModelMatrix);
 bool intersectRayTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDir, const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, float& t);
@@ -126,7 +128,8 @@ int main()
     Model reticle2d("model/mira4/miragreen.gltf");
     Model shootD("model/shoot/shootD.gltf");
     Model shootM("model/shoot/shootM.gltf");
-    Model field("model/field/field.gltf");
+    Model field("model/field/scene.gltf");
+    Model lamp("model/lamp/lamp.gltf");
     target = Model("model/target/target.gltf");
 
     targetModelMatrix = glm::translate(targetModelMatrix, glm::vec3(30.0f, 2.0f, 50.0f)); // Posición inicial
@@ -183,6 +186,12 @@ int main()
 
         // Field
         drawField(ourShader, view, projection, field);
+
+        // Lampara 1
+        drawLamp1(ourShader, view, projection, lamp);
+
+        // Lampara 2
+        drawLamp2(ourShader, view, projection, lamp);
 
         // Dibujar el arma seleccionada
         if (showDeagle) {
@@ -535,7 +544,7 @@ void drawReticle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& 
   // Dibujar Logo
 void drawLogo(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& logo) {
     glm::mat4 logoMatrix = glm::mat4(1.0f);
-    logoMatrix = glm::translate(logoMatrix, glm::vec3(20.0f, 5.1f, 20.0f));
+    logoMatrix = glm::translate(logoMatrix, glm::vec3(20.0f, 4.5f, 20.0f));
     logoMatrix = glm::scale(logoMatrix, glm::vec3(100.0f));
     shader.setMat4("model", logoMatrix);
     logo.Draw(shader);
@@ -551,4 +560,26 @@ void drawField(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& fi
     fieldMatrix = glm::scale(fieldMatrix, glm::vec3(2.0f));
     shader.setMat4("model", fieldMatrix);
     field.Draw(shader);
+}
+
+// Lampara 1
+void drawLamp1(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& lamp1) {
+    glm::mat4 lamp1Matrix = glm::mat4(1.0f);
+    lamp1Matrix = glm::translate(lamp1Matrix, glm::vec3(6.5f, -1.2f, 20.0f));
+    lamp1Matrix = glm::rotate(lamp1Matrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    lamp1Matrix = glm::rotate(lamp1Matrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    lamp1Matrix = glm::scale(lamp1Matrix, glm::vec3(0.08f));
+    shader.setMat4("model", lamp1Matrix);
+    lamp1.Draw(shader);
+}
+
+// Lampara 2
+void drawLamp2(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& lamp2) {
+    glm::mat4 lamp2Matrix = glm::mat4(1.0f);
+    lamp2Matrix = glm::translate(lamp2Matrix, glm::vec3(32.5f, -1.0f, 20.0f));
+    lamp2Matrix = glm::rotate(lamp2Matrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    lamp2Matrix = glm::rotate(lamp2Matrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    lamp2Matrix = glm::scale(lamp2Matrix, glm::vec3(0.08f));
+    shader.setMat4("model", lamp2Matrix);
+    lamp2.Draw(shader);
 }
