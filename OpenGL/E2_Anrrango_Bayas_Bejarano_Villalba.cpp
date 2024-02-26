@@ -477,10 +477,7 @@ void drawReticle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& 
 void drawLogo(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& logo) {
     glm::mat4 logoMatrix = glm::mat4(1.0f);
     logoMatrix = glm::translate(logoMatrix, glm::vec3(11.0f, 5.1f, 20.0f)); // Moviendo más cerca
-    //logoMatrix = glm::rotate(logoMatrix, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    //logoMatrix = glm::rotate(logoMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 1.0f));
     logoMatrix = glm::scale(logoMatrix, glm::vec3(100.0f)); // Haciendo la mira más pequeña
-    //logoMatrix = glm::inverse(view) * logoMatrix;
     shader.setMat4("model", logoMatrix);
     logo.Draw(shader);
 }
