@@ -5,22 +5,16 @@ using namespace std;
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 #include <learnopengl/shader.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/model.h>
-
 #include <iostream>
-
 #include <vector>
 #include <random>
 
 #define STB_IMAGE_IMPLEMENTATION 
 #include <learnopengl/stb_image.h>
-
 #include <SFML/Audio.hpp>
-
-
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -31,6 +25,8 @@ unsigned int loadTexture(const char* path);
 void drawM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& m4);
 void drawDeagle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& deagle);
 void drawBayonet(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& bayonet);
+void drawReticle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& reticle2d);
+void drawLogo(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& logo);
 void drawSkybox(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& skybox);
 void drawShootDeagle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& shootD);
 void drawShootM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& shootM);
@@ -50,7 +46,7 @@ const unsigned int SCR_HEIGHT = 1080;
 //const unsigned int SCR_HEIGHT = 1440;
 
 // Camera
-Camera camera(glm::vec3(20.0f, 3.2f, 50.0f)); // Armas listas
+Camera camera(glm::vec3(20.0f, 3.2f, 50.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -125,15 +121,16 @@ int main()
     Model target("model/target/target.gltf");
     Model logo("model/logo/logo.gltf");
     Model bayonet("model/bayonet/bayonet.gltf");
+    Model reticle2d("model/mira4/miragreen.gltf");
     Model shootD("model/shoot/shootD.gltf");
     Model shootM("model/shoot/shootM.gltf");
-    
     target = Model("model/target/target.gltf");
 
     targetModelMatrix = glm::translate(targetModelMatrix, glm::vec3(30.0f, 2.0f, 50.0f)); // Posición inicial
     targetModelMatrix = glm::rotate(targetModelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     targetModelMatrix = glm::rotate(targetModelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     targetModelMatrix = glm::scale(targetModelMatrix, glm::vec3(0.2f, 0.2f, 0.2f)); // Escala inicial
+
 
     float vertices[] = {
        // Coordenadas XYZ         // Normales XYZ           // Coordenadas de textura UV
@@ -228,8 +225,6 @@ int main()
 
     camera.MovementSpeed = 7; //Optional. Modify the speed of the camera
 
-
-
     // render loop
     while (!glfwWindowShouldClose(window))
     {
@@ -274,6 +269,12 @@ int main()
 
         // SKYBOX
         drawSkybox(ourShader, view, projection, skybox);
+ 
+        // Mira
+        drawReticle(ourShader, view, projection, reticle2d);
+      
+        // logo
+        drawLogo(ourShader, view, projection, logo);
 
         // Dibujar el arma seleccionada
         if (showDeagle) {
@@ -581,7 +582,6 @@ void drawBayonet(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& 
     shader.setMat4("model", cuchilloMatrix);
     bayonet.Draw(shader);
 }
-
 // Dibujar Skybox
 void drawSkybox(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& skybox) {
     glm::mat4 skyboxMatrix = glm::mat4(1.0f);
@@ -615,4 +615,24 @@ void drawShootM4(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& 
     shootM4Matrix = glm::inverse(view) * shootM4Matrix;
     shader.setMat4("model", shootM4Matrix);
     shootM4.Draw(shader);
+
+// Dibujar Reticula
+void drawReticle(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& reticle2d) {
+    glm::mat4 reticleMatrix = glm::mat4(1.0f);
+    reticleMatrix = glm::translate(reticleMatrix, glm::vec3(0.0f, 0.0f, -0.30f)); // Moviendo m�s cerca
+    reticleMatrix = glm::rotate(reticleMatrix, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    reticleMatrix = glm::rotate(reticleMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 1.0f));
+    reticleMatrix = glm::scale(reticleMatrix, glm::vec3(0.003f)); // Haciendo la mira m�s peque�a
+    reticleMatrix = glm::inverse(view) * reticleMatrix;
+    shader.setMat4("model", reticleMatrix);
+    reticle2d.Draw(shader);
+}
+
+  // Dibujar Logo
+void drawLogo(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& logo) {
+    glm::mat4 logoMatrix = glm::mat4(1.0f);
+    logoMatrix = glm::translate(logoMatrix, glm::vec3(11.0f, 5.1f, 20.0f)); // Moviendo m�s cerca
+    logoMatrix = glm::scale(logoMatrix, glm::vec3(100.0f)); // Haciendo la mira m�s peque�a
+    shader.setMat4("model", logoMatrix);
+    logo.Draw(shader);
 }
