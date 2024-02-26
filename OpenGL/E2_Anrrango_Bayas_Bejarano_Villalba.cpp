@@ -41,11 +41,11 @@ bool intersectsTargetRayTriangle(const glm::vec3& rayOrigin, const glm::vec3& ra
 void checkRayIntersection(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, glm::mat4& targetModelMatrix, const Model& target);
 void repositionTarget(glm::mat4& modelMatrix, const glm::vec3& currentPosition);
 
-// settings FHD
+// Settings FHD
 const unsigned int SCR_WIDTH = 1920; 
 const unsigned int SCR_HEIGHT = 1080;
 
-// settings 2K
+// Settings 2K
 //const unsigned int SCR_WIDTH = 2560;
 //const unsigned int SCR_HEIGHT = 1440;
 
@@ -55,16 +55,16 @@ float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
-// timing
+// Timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-// visualizar armas
+// Visualizar armas
 bool showDeagle = false;
 bool showM4 = false;
 bool showBayonet = true;
 
-// visualizar disparo
+// Visualizar disparo
 bool isShooting = false; // Estado del disparo
 float shootTime = 0.0f; // Tiempo desde que se disparó
 float shootDuration = 0.1f; // Duración visible del disparo
@@ -107,9 +107,6 @@ int main()
         return -1;
     }
 
-    // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
-    //stbi_set_flip_vertically_on_load(true);
-
     // configure global opengl state
     glEnable(GL_DEPTH_TEST);
 
@@ -117,7 +114,6 @@ int main()
     Shader ourShader("shaders/shader_exercise16_mloading.vs", "shaders/shader_exercise16_mloading.fs");
 
     // load models
-
     Model deagle("model/deagle/deagle.gltf");
     Model m4("model/m4/m4.gltf");
     Model skybox("model/skybox/skybox.gltf");
@@ -136,7 +132,7 @@ int main()
     targetModelMatrix = glm::rotate(targetModelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     targetModelMatrix = glm::scale(targetModelMatrix, glm::vec3(0.2f, 0.2f, 0.2f)); // Escala inicial
 
-    camera.MovementSpeed = 70;
+    camera.MovementSpeed = 7;
 
     // render loop
     while (!glfwWindowShouldClose(window))
