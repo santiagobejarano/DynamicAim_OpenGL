@@ -131,56 +131,49 @@ int main()
     targetModelMatrix = glm::rotate(targetModelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     targetModelMatrix = glm::scale(targetModelMatrix, glm::vec3(0.2f, 0.2f, 0.2f)); // Escala inicial
 
+    float floorVertices[] = {
+        // Coordenadas XYZ    // Normales XYZ      //Textura
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 
-    float vertices[] = {
-       // Coordenadas XYZ         // Normales XYZ           // Coordenadas de textura UV
-       // Cara trasera
-       -0.6f, -0.6f, -0.6f,       0.0f,  0.0f, -1.0f,       0.5343f, 0.51f,    // Esquina inferior izquierda
-        0.6f, -0.6f, -0.6f,       0.0f,  0.0f, -1.0f,       0.7291f, 0.3264f,    // Esquina inferior derecha    
-        0.6f,  0.6f, -0.6f,       0.0f,  0.0f, -1.0f,       0.7291f, 0.3264f, // Esquina superior derecha              
-        0.6f,  0.6f, -0.6f,       0.0f,  0.0f, -1.0f,       0.7291f, 0.3264f, // Esquina superior derecha
-       -0.6f,  0.6f, -0.6f,       0.0f,  0.0f, -1.0f,       0.5343f, 0.51f, // Esquina superior izquierda
-       -0.6f, -0.6f, -0.6f,       0.0f,  0.0f, -1.0f,       0.5343f, 0.51f,    // Esquina inferior izquierda                
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-       // Cara frontal
-       -0.6f, -0.6f,  0.6f,       0.0f,  0.0f,  1.0f,       0.5343f, 0.51f,    // Esquina inferior izquierda
-        0.6f,  0.6f,  0.6f,       0.0f,  0.0f,  1.0f,       0.7291f, 0.3264f, // Esquina superior derecha
-        0.6f, -0.6f,  0.6f,       0.0f,  0.0f,  1.0f,       0.7291f, 0.3264f,    // Esquina inferior derecha        
-        0.6f,  0.6f,  0.6f,       0.0f,  0.0f,  1.0f,       0.7291f, 0.3264f, // Esquina superior derecha
-       -0.6f, -0.6f,  0.6f,       0.0f,  0.0f,  1.0f,       0.5343f, 0.51f,    // Esquina inferior izquierda
-       -0.6f,  0.6f,  0.6f,       0.0f,  0.0f,  1.0f,       0.5343f, 0.3264f, // Esquina superior izquierda        
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-       // Cara izquierda
-       -0.6f,  0.6f,  0.6f,       -1.0f, 0.0f,  0.0f,       0.7291f, 0.3264f, // Esquina superior derecha
-       -0.6f, -0.6f, -0.6f,       -1.0f, 0.0f,  0.0f,       0.925f, 0.51f,      // Esquina inferior izquierda
-       -0.6f,  0.6f, -0.6f,       -1.0f, 0.0f,  0.0f,       0.925f, 0.3264f,   // Esquina superior izquierda       
-       -0.6f, -0.6f, -0.6f,       -1.0f, 0.0f,  0.0f,       0.925f, 0.51f,      // Esquina inferior izquierda
-       -0.6f,  0.6f,  0.6f,       -1.0f, 0.0f,  0.0f,       0.7291f, 0.3264f, // Esquina superior derecha
-       -0.6f, -0.6f,  0.6f,       -1.0f, 0.0f,  0.0f,       0.7291f, 0.51f,    // Esquina inferior derecha
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-       // Cara derecha
-        0.6f,  0.6f,  0.6f,       1.0f,  0.0f,  0.0f,       0.5343f, 0.3264f, // Esquina superior izquierda
-        0.6f,  0.6f, -0.6f,       1.0f,  0.0f,  0.0f,       0.3385f, 0.3264f, // Esquina superior derecha      
-        0.6f, -0.6f, -0.6f,       1.0f,  0.0f,  0.0f,       0.3385f, 0.51f,    // Esquina inferior derecha          
-        0.6f, -0.6f, -0.6f,       1.0f,  0.0f,  0.0f,       0.3385f, 0.51f,    // Esquina inferior derecha
-        0.6f, -0.6f,  0.6f,       1.0f,  0.0f,  0.0f,       0.5343f, 0.51f,    // Esquina inferior izquierda
-        0.6f,  0.6f,  0.6f,       1.0f,  0.0f,  0.0f,       0.5343f, 0.3264f, // Esquina superior izquierda
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
 
-        // Cara inferior          
-        -0.6f, -0.6f, -0.6f,       0.0f, -1.0f,  0.0f,       0.5343f, 0.7435f, // Esquina superior derecha
-         0.6f, -0.6f,  0.6f,       0.0f, -1.0f,  0.0f,       0.7291f, 0.51f,    // Esquina inferior izquierda
-         0.6f, -0.6f, -0.6f,       0.0f, -1.0f,  0.0f,       0.7291f, 0.7435f, // Esquina superior izquierda        
-         0.6f, -0.6f,  0.6f,       0.0f, -1.0f,  0.0f,       0.7291f, 0.51f,    // Esquina inferior izquierda
-        -0.6f, -0.6f, -0.6f,       0.0f, -1.0f,  0.0f,       0.5343f, 0.7435f, // Esquina superior derecha
-        -0.6f, -0.6f,  0.6f,       0.0f, -1.0f,  0.0f,       0.5343f, 0.51f,    // Esquina inferior derecha
-
-        // Cara superior
-        -0.6f,  0.6f, -0.6f,       0.0f,  1.0f,  0.0f,       0.5343f, 0.51f,  // Esquina superior izquierda
-         0.6f,  0.6f, -0.6f,       0.0f,  1.0f,  0.0f,       0.925f, 0.51f,  // Esquina superior derecha
-         0.6f,  0.6f,  0.6f,       0.0f,  1.0f,  0.0f,       0.7291f, 0.3264f, // Esquina inferior derecha                 
-         0.6f,  0.6f,  0.6f,       0.0f,  1.0f,  0.0f,       0.7291f, 0.3264f, // Esquina inferior derecha
-        -0.6f,  0.6f,  0.6f,       0.0f,  1.0f,  0.0f,       0.5343f, 0.51f,  // Esquina inferior izquierda  
-        -0.6f,  0.6f, -0.6f,       0.0f,  1.0f,  0.0f,       0.5343f, 0.3264f  // Esquina superior izquierda  
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
     };
 
     // SUELO PROVISIONAL
@@ -200,7 +193,7 @@ int main()
     glGenBuffers(1, &VBO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertices), floorVertices, GL_STATIC_DRAW);
 
     glBindVertexArray(cubeVAO);
 
@@ -218,7 +211,7 @@ int main()
 
     // shader configuration
     ourShader.use();
-    ourShader.setInt("material.diffuse1", 0); // Texture unit 0
+    ourShader.setInt("material.diffuse", 0); // Texture unit 0
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -244,6 +237,16 @@ int main()
         ourShader.use();
         glActiveTexture(GL_TEXTURE0); // Cambia a la unidad de textura de los cubos
         glBindTexture(GL_TEXTURE_2D, diffuseMap1);
+
+        // Se activa activar el shader para configurar las variables uniformes/dibujar objetos
+        ourShader.setVec3("viewPos", camera.Position);
+        ourShader.setFloat("material.shininess", 1000.0f);
+
+        // directional light
+        ourShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+        ourShader.setVec3("dirLight.ambient", 0.8f, 0.8f, 0.8f);
+        ourShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+        ourShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
         // view / projection / transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1500.0f);
