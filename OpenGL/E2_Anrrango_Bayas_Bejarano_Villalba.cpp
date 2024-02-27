@@ -72,6 +72,10 @@ float shootDuration = 0.1f; // Duración visible del disparo
 Model target;
 glm::mat4 targetModelMatrix = glm::mat4(1.0f);
 
+// posición de las lámparas
+glm::vec3 posLamp1 = glm::vec3(6.5f, -1.2f, 20.0f);
+glm::vec3 posLamp2 = glm::vec3(32.5f, -1.0f, 20.0f);
+
 int main()
 {
     // glfw: initialize and configure
@@ -157,13 +161,31 @@ int main()
         ourShader.use();
         // Se activa activar el shader para configurar las variables uniformes/dibujar objetos
         ourShader.setVec3("viewPos", camera.Position);
-        ourShader.setFloat("material.shininess", 1000.0f);
+        ourShader.setFloat("material.shininess", 100.0f);
 
-        // directional light
+        // Luz direccional para el sol
         ourShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
         ourShader.setVec3("dirLight.ambient", 0.8f, 0.8f, 0.8f);
         ourShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
         ourShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+
+        // Punto de luz [LÁMPARA 1] izquierda
+        ourShader.setVec3("pointLights[0].position", posLamp1.x+0.5f, -(posLamp1.y)+1.0f, posLamp1.z + 4.0f);
+        ourShader.setVec3("pointLights[0].ambient", 0.8f, 0.8f, 0.8f);
+        ourShader.setVec3("pointLights[0].diffuse", 1.0f, 0.82f, 0.0f); //cambio de color
+        ourShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+        ourShader.setFloat("pointLights[0].constant", 1.0f);
+        ourShader.setFloat("pointLights[0].linear", 0.05); //distancia luz-fragmento
+        ourShader.setFloat("pointLights[0].quadratic", 0.00000000001); //atenuación con la distancia
+        
+        // Punto de luz [LÁMPARA 2] derecha
+        ourShader.setVec3("pointLights[1].position", posLamp2.x + 0.5f, -(posLamp2.y) + 1.0f, posLamp1.z + 4.0f);
+        ourShader.setVec3("pointLights[1].ambient", 0.8f, 0.8f, 0.8f);
+        ourShader.setVec3("pointLights[1].diffuse", 1.0f, 0.82f, 0.0f);
+        ourShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+        ourShader.setFloat("pointLights[1].constant", 1.0f);
+        ourShader.setFloat("pointLights[1].linear", 0.05);
+        ourShader.setFloat("pointLights[1].quadratic", 0.00000000001);
 
         // view / projection / transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1500.0f);
@@ -565,7 +587,7 @@ void drawField(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& fi
 // Lampara 1
 void drawLamp1(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& lamp1) {
     glm::mat4 lamp1Matrix = glm::mat4(1.0f);
-    lamp1Matrix = glm::translate(lamp1Matrix, glm::vec3(6.5f, -1.2f, 20.0f));
+    lamp1Matrix = glm::translate(lamp1Matrix, posLamp1);
     lamp1Matrix = glm::rotate(lamp1Matrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     lamp1Matrix = glm::rotate(lamp1Matrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     lamp1Matrix = glm::scale(lamp1Matrix, glm::vec3(0.08f));
@@ -576,7 +598,7 @@ void drawLamp1(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& la
 // Lampara 2
 void drawLamp2(Shader& shader, glm::mat4& view, glm::mat4& projection, Model& lamp2) {
     glm::mat4 lamp2Matrix = glm::mat4(1.0f);
-    lamp2Matrix = glm::translate(lamp2Matrix, glm::vec3(32.5f, -1.0f, 20.0f));
+    lamp2Matrix = glm::translate(lamp2Matrix, posLamp2);
     lamp2Matrix = glm::rotate(lamp2Matrix, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     lamp2Matrix = glm::rotate(lamp2Matrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     lamp2Matrix = glm::scale(lamp2Matrix, glm::vec3(0.08f));
